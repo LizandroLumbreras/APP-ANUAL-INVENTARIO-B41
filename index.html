@@ -179,7 +179,9 @@
         <label for="sucursal">Sucursal:</label>
         <select id="sucursal">
           <option value="">-- Selecciona sucursal --</option>
-          <option>Bodega 41</option>
+          <option>Matriz</option><option>Provileon</option><option>Central</option><option>Osito</option>
+          <option>Bodega Principal</option><option>Bodega Abarrotes</option><option>Bodega Dulces</option>
+          <option>Zapata</option><option>Allende</option><option>Allende 2</option><option>Rio Verde</option><option>Montemorelos</option><option>Bodega 41</option>
         </select>
 
         <label for="usuario">Usuario:</label>
@@ -291,15 +293,13 @@
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
-const firebaseConfig = {
-  apiKey: "AIzaSyA0JYm16CaVXr86ZGbKP8tpe47rl0LdBaw",
-  authDomain: "bd-bodega41.firebaseapp.com",
-  projectId: "bd-bodega41",
-  storageBucket: "bd-bodega41.firebasestorage.app",
-  messagingSenderId: "63153834263",
-  appId: "1:63153834263:web:32f306d4dea573bee74f52",
-  measurementId: "G-YCCWZCHCEV"
-};
+      apiKey: "AIzaSyCK5nb6u2CGRJ8AB1aPlRn54b97bdeAFeM",
+      authDomain: "inventariopv-643f1.firebaseapp.com",
+      projectId: "inventariopv-643f1",
+      storageBucket: "inventariopv-643f1.appspot.com",
+      messagingSenderId: "96242533231",
+      appId: "1:96242533231:web:aae75a18fbaf9840529e9a"
+    };
     const app = initializeApp(firebaseConfig);
     const db  = getFirestore(app);
     const DEC_CANTIDAD = 3;
