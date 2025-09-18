@@ -139,27 +139,24 @@
     .producto-card{ border:2px solid #333; border-radius:10px; padding:10px; background:#fff; box-shadow:2px 2px 6px rgba(0,0,0,0.08) }
     .btn-ok{ background:#1e8e3e; color:white; font-weight:700; border-radius:10px; padding:8px 10px }
    
-  /* === Botones de icono (toolbar) === */
-.icon-btn{
-  display:grid; place-items:center;
-  padding:0;                /* sin relleno extra */
-  width:clamp(44px, 10vw, 56px);
-  height:clamp(44px, 10vw, 56px);   /* objetivo táctil >= 44px */
-  border-radius:14px;
-  font-size:clamp(22px, 5.8vw, 28px); /* ícono grande */
-  line-height:1;
-}
+    /* === Botones de icono (toolbar) === */
+    .icon-btn{
+      display:grid; place-items:center;
+      padding:0;
+      width:clamp(44px, 10vw, 56px);
+      height:clamp(44px, 10vw, 56px);
+      border-radius:14px;
+      font-size:clamp(22px, 5.8vw, 28px);
+      line-height:1;
+    }
+    .icon-btn.boton{ background:#0c6cbd; color:#fff }
+    .icon-btn.btn-ghost{ background:#e8edf6; color:#0c2a5e }
 
-/* variantes visuales (usa tus clases existentes) */
-.icon-btn.boton{ background:#0c6cbd; color:#fff }
-.icon-btn.btn-ghost{ background:#e8edf6; color:#0c2a5e }
-
-/* grid compacto para la fila de la toolbar */
-.toolbar .row{
-  grid-template-columns: repeat(5, minmax(44px, 1fr));
-  justify-items:center;
-  gap:10px;
-}
+    .toolbar .row{
+      grid-template-columns: repeat(5, minmax(44px, 1fr));
+      justify-items:center;
+      gap:10px;
+    }
   </style>
 </head>
 <body>
@@ -198,16 +195,16 @@
 
     <!-- ===== Pantalla 2: Captura ===== -->
     <section id="view-captura" class="view">
-      <!-- Toolbar superior (reemplaza el dock inferior) -->
-<div class="toolbar">
-  <div class="row">
-    <button class="btn-ghost icon-btn" id="tbBack"   title="Volver"  aria-label="Volver">⬅️</button>
-    <button class="btn-ghost icon-btn" id="tbBuscar" title="Buscar"  aria-label="Buscar">🔎</button>
-    <button class="btn-ghost icon-btn" id="tbScan"   title="Escanear" aria-label="Escanear">📷</button>
-    <button class="btn-ghost icon-btn" id="tbCart"   title="Carrito" aria-label="Carrito">🛒</button>
-    <button class="boton icon-btn"    id="tbAdd"    title="Agregar" aria-label="Agregar">➕</button>
-  </div>
-</div>
+      <!-- Toolbar superior -->
+      <div class="toolbar">
+        <div class="row">
+          <button class="btn-ghost icon-btn" id="tbBack"   title="Volver"  aria-label="Volver">⬅️</button>
+          <button class="btn-ghost icon-btn" id="tbBuscar" title="Buscar"  aria-label="Buscar">🔎</button>
+          <button class="btn-ghost icon-btn" id="tbScan"   title="Escanear" aria-label="Escanear">📷</button>
+          <button class="btn-ghost icon-btn" id="tbCart"   title="Carrito" aria-label="Carrito">🛒</button>
+          <button class="boton icon-btn"    id="tbAdd"    title="Agregar" aria-label="Agregar">➕</button>
+        </div>
+      </div>
 
       <div class="fila sec">
         <input type="text" id="codigo" placeholder="Escanea o escribe el código de barras..." autocomplete="off" inputmode="numeric">
@@ -237,7 +234,7 @@
       </div>
     </section>
 
-    <!-- ===== Pantalla 3: Carrito (partidas) ===== -->
+    <!-- ===== Pantalla 3: Carrito ===== -->
     <section id="view-carrito" class="view">
       <div class="fila sec">
         <button class="btn-ghost" id="btnVolverCaptura">⬅ Volver a captura</button>
@@ -291,18 +288,19 @@
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-  // ✅ CONFIG LECTURA (BD BODEGA41) — usa la tuya de la consola
+  /* ========== Firebase (dos proyectos) ========== */
+  // LECTURA: bd-bodega41
   const firebaseConfigREAD = {
     apiKey: "AIzaSyA0JYm16CaVXr86ZGbKP8tpe47rl0LdBaw",
     authDomain: "bd-bodega41.firebaseapp.com",
     projectId: "bd-bodega41",
-    storageBucket: "bd-bodega41.appspot.com",   // suele ser appspot.com
+    storageBucket: "bd-bodega41.appspot.com",
     messagingSenderId: "63153834263",
     appId: "1:63153834263:web:32f306d4dea573bee74f52",
     measurementId: "G-YCCWZCHCEV"
   };
 
-  // ✅ CONFIG ESCRITURA (inventariopv) — la que ya usabas
+  // ESCRITURA: inventariopv-643f1
   const firebaseConfigWRITE = {
     apiKey: "AIzaSyCK5nb6u2CGRJ8AB1aPlRn54b97bdeAFeM",
     authDomain: "inventariopv-643f1.firebaseapp.com",
@@ -312,19 +310,16 @@
     appId: "1:96242533231:web:aae75a18fbaf9840529e9a"
   };
 
-  // 📦 Dos apps distintas
   const appRead  = initializeApp(firebaseConfigREAD,  "app-read-b41");
   const appWrite = initializeApp(firebaseConfigWRITE, "app-write-inv");
 
-  // 🔌 Dos Firestores
-  const dbRead  = getFirestore(appRead);   // ← productos (BODEGA41)
-  const dbWrite = getFirestore(appWrite);  // ← escaneos (inventariopv)
+  const dbRead  = getFirestore(appRead);   // productos/equivalencias (B41)
+  const dbWrite = getFirestore(appWrite);  // escaneos (inventariopv)
 
-  // (Opcional) Si inventariopv exige auth para escribir:
   const authWrite = getAuth(appWrite);
-  signInAnonymously(authWrite).catch(() => { /* habilita Anónimo si lo necesitas */ });
+  signInAnonymously(authWrite).catch(()=>{});
 
-  // ========= UTILIDADES (tuyas, sin cambios) =========
+  /* ========== Utilidades ========== */
   const DEC_CANTIDAD = 3;
   const DELTA = 1;
   const pad2 = (n) => String(n).padStart(2,'0');
@@ -341,30 +336,29 @@
     return `AnualesPDD-${ymd}-${(r[0]>>>0).toString(36).toUpperCase().slice(-5)}`;
   }
   function beep(ms=120, freq=880){
-    try{ const ctx=new (window.AudioContext||window.webkitAudioContext)(); const o=ctx.createOscillator(), g=ctx.createGain();
-      o.frequency.value=freq; o.connect(g); g.connect(ctx.destination); g.gain.setValueAtTime(0.2, ctx.currentTime);
+    try{
+      const ctx=new (window.AudioContext||window.webkitAudioContext)();
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.frequency.value=freq; o.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(0.2, ctx.currentTime);
       o.start(); setTimeout(()=>{o.stop(); ctx.close();}, ms);
     }catch{}
   }
 
-  // ========= TUS REFERENCIAS DE DOM (sin cambios) =========
+  /* ========== DOM refs ========== */
   const appRoot=document.getElementById('appRoot');
   const viewSetup=$("view-setup"), viewCaptura=$("view-captura"), viewCarrito=$("view-carrito");
   const folioSpan=$("folio"), chipModo=$("chipModo");
   const selectSucursal=$("sucursal"), selectUsuario=$("usuario"), btnContinuar=$("btnContinuar");
-
   const inputCodigo=$("codigo"), inputCantidad=$("cantidad");
   const previewBox=$("preview"), pDesc=$("pDesc"), pCodigo=$("pCodigo"), pPeso=$("pPeso"), pAviso=$("pAviso");
   const tabla=$("tabla-productos");
-
   const tbBack=$("tbBack"), tbBuscar=$("tbBuscar"), tbScan=$("tbScan"), tbCart=$("tbCart"), tbAdd=$("tbAdd");
-
   const modal=$("modal"), cerrarModalBtn=$("cerrarModal"), inputBuscador=$("buscador"), resultadosDiv=$("resultados");
   const barraProgreso=$("barraProgreso"), estado=$("estado"), contador=$("contador"), btnPrev=$("prev"), btnNext=$("next");
-
   const divLector=$("lector"), tablaCarrito=$("tabla-carrito"), btnVolverCaptura=$("btnVolverCaptura");
 
-  // ========= ESTADO (sin cambios) =========
+  /* ========== Estado ========== */
   let folio = localStorage.getItem("folioInventarioAnuales") || generarFolio();
   folioSpan.textContent = folio; chipModo.textContent="Modo: Acumular";
   const usuarioPrevio = localStorage.getItem("usuarioInventarioAnuales") || "";
@@ -381,6 +375,7 @@
   selectUsuario.addEventListener("change", persistLocal);
   selectSucursal.addEventListener("change", persistLocal);
 
+  /* ========== Navegación y protección refresh ========== */
   function toggleBeforeUnload(enable){
     const handler = (e)=>{ e.preventDefault(); e.returnValue=''; };
     if(enable){ window.addEventListener('beforeunload', handler); }
@@ -413,62 +408,129 @@
   tbBack.addEventListener("click", backToSetup);
   btnVolverCaptura.addEventListener("click", ()=> setView("captura"));
 
-  // ========= PRODUCTOS → SIEMPRE dbRead =========
+  /* ========== Productos (LECTURA en B41) ========== */
   function detectarCodigoPeso(codigoStr){
     if(/^\d{13}$/.test(codigoStr) && codigoStr.startsWith("20")){
-      const base=codigoStr.substring(0,7); const pesoNum=parseInt(codigoStr.substring(7,12),10);
+      const base=codigoStr.substring(0,7);
+      const pesoNum=parseInt(codigoStr.substring(7,12),10);
       return {base, pesoKg: pesoNum/1000};
     }
     return null;
   }
 
-  async function buscarEnEquivalencias(code){
-    const qy = query(collection(dbRead,"productos"),
-                     where("codigosEquivalentes","array-contains",String(code).trim()));
-    const snap=await getDocs(qy);
-    if(!snap.empty){ const d=snap.docs[0]; return {principal:d.id, data:d.data()} }
+  // Equivalencias flexibles: colección auxiliar + múltiples campos
+  async function buscarEquivalenteFlexible(code){
+    const limpio = String(code).trim();
+
+    // 1) Colección auxiliar: equivalencias/{equivalente} -> { principal }
+    try{
+      const refMap  = doc(dbRead, "equivalencias", limpio);
+      const snapMap = await getDoc(refMap);
+      if (snapMap.exists() && snapMap.data()?.principal){
+        const principalId = String(snapMap.data().principal);
+        const pSnap = await getDoc(doc(dbRead,"productos",principalId));
+        if (pSnap.exists()){
+          return { principal: principalId, data: pSnap.data(), matchedIn: "equivalencias (colección)" };
+        }
+      }
+    }catch(_){}
+
+    // 2) Arrays dentro de productos
+    for (const campo of ["codigosEquivalentes","equivalentes","codigoEquivalente"]){
+      try{
+        const qy = query(
+          collection(dbRead,"productos"),
+          where(campo,"array-contains",limpio),
+          limit(1)
+        );
+        const snap = await getDocs(qy);
+        if (!snap.empty){
+          const d = snap.docs[0];
+          return { principal: d.id, data: d.data(), matchedIn: `${campo} (array)` };
+        }
+      }catch(_){}
+    }
+
+    // 3) Strings dentro de productos
+    for (const campo of ["codigoEquivalente","codigoAlterno","codigoSecundario"]){
+      try{
+        const qy = query(
+          collection(dbRead,"productos"),
+          where(campo,"==",limpio),
+          limit(1)
+        );
+        const snap = await getDocs(qy);
+        if (!snap.empty){
+          const d = snap.docs[0];
+          return { principal: d.id, data: d.data(), matchedIn: `${campo} (string)` };
+        }
+      }catch(_){}
+    }
+
     return null;
   }
 
+  // Obtener producto por ID (B41)
   async function getProductoPorId(id){
-    const r = doc(dbRead,"productos",id);
+    const r = doc(dbRead, "productos", id);
     const d = await getDoc(r);
-    return d.exists()? {id,...d.data()}:null;
+    return d.exists()? {id, ...d.data()} : null;
   }
 
+  // Resolver código → producto (incluye balanza y equivalencias)
   async function resolverProducto(codigoInput){
-    const codigoStr=String(codigoInput).trim();
-    const det=detectarCodigoPeso(codigoStr);
-    if(det){
-      const eq=await buscarEnEquivalencias(det.base);
-      if(eq && eq.principal){
-        const d=eq.data || (await getProductoPorId(eq.principal));
-        if(d) return {descripcion:d.concepto ?? "Sin descripción", codigo:eq.principal, cantidad:roundTo(det.pesoKg,DEC_CANTIDAD), isPeso:true};
+    const codigoStr = String(codigoInput).trim();
+
+    // 1) Etiqueta de balanza (20……)
+    const det = detectarCodigoPeso(codigoStr);
+    if (det){
+      const eq = await buscarEquivalenteFlexible(det.base);
+      if (eq && eq.principal){
+        const d = eq.data || (await getProductoPorId(eq.principal));
+        if (d){
+          return {
+            descripcion: d.concepto ?? "Sin descripción",
+            codigo: eq.principal,
+            cantidad: roundTo(det.pesoKg, DEC_CANTIDAD),
+            isPeso: true
+          };
+        }
       }
     }
-    if(cacheProductos[codigoStr]) return cacheProductos[codigoStr];
 
-    // 🔁 busca por codigoBarra exacto en B41
-    let s1=await getDocs(query(collection(dbRead,"productos"), where("codigoBarra","==",codigoStr), limit(1)));
-    if(!s1.empty){ const d=s1.docs[0].data(); return {descripcion:d.concepto ?? "Sin desc", codigo:s1.docs[0].id}; }
+    // 2) Cache
+    if (cacheProductos?.[codigoStr]) return cacheProductos[codigoStr];
 
-    // equivalentes
-    const eq=await buscarEnEquivalencias(codigoStr);
-    if(eq && eq.principal){
-      const d=eq.data || (await getProductoPorId(eq.principal));
-      if(d) return {descripcion:d.concepto ?? "Sin desc", codigo:eq.principal};
+    // 3) Código de barras exacto
+    let s1 = await getDocs(query(
+      collection(dbRead,"productos"),
+      where("codigoBarra","==",codigoStr),
+      limit(1)
+    ));
+    if (!s1.empty){
+      const d = s1.docs[0].data();
+      return { descripcion: d.concepto ?? "Sin desc", codigo: s1.docs[0].id };
     }
 
-    // por id
-    const byId=await getProductoPorId(codigoStr);
-    if(byId) return {descripcion:byId.concepto ?? "Sin desc", codigo:byId.id};
+    // 4) Equivalencias
+    const eq = await buscarEquivalenteFlexible(codigoStr);
+    if (eq && eq.principal){
+      const d = eq.data || (await getProductoPorId(eq.principal));
+      if (d) return { descripcion: d.concepto ?? "Sin desc", codigo: eq.principal };
+    }
+
+    // 5) Por ID exacto
+    const byId = await getProductoPorId(codigoStr);
+    if (byId) return { descripcion: byId.concepto ?? "Sin desc", codigo: byId.id };
 
     throw new Error("Producto no encontrado");
   }
 
-  // ========= PREVIEW + GUARDADO (escritura) → dbWrite =========
+  /* ========== Preview + Guardado (ESCRITURA en inventariopv) ========== */
   async function previsualizar(){
-    const codigo=(inputCodigo.value||"").trim(); if(!codigo){ ocultarPreview(); return; }
+    const codigo=(inputCodigo.value||"").trim();
+    if(!codigo){ ocultarPreview(); return; }
+
     const p=await resolverProducto(codigo);
     productoPreview={ descripcion:p.descripcion, codigo:p.codigo, cantidad:p.cantidad, isPeso:!!p.isPeso };
     pDesc.textContent=p.descripcion || "SIN DESCRIPCIÓN";
@@ -484,7 +546,10 @@
     }
     previewBox.style.display="block";
   }
-  function ocultarPreview(){ previewBox.style.display="none"; pDesc.textContent=""; pCodigo.textContent=""; pPeso.textContent=""; pPeso.style.display="none"; pAviso.textContent=""; productoPreview=null; }
+  function ocultarPreview(){
+    previewBox.style.display="none"; pDesc.textContent=""; pCodigo.textContent="";
+    pPeso.textContent=""; pPeso.style.display="none"; pAviso.textContent=""; productoPreview=null;
+  }
 
   inputCodigo.addEventListener("keydown", e=>{
     if(e.key==="Enter"){ e.preventDefault(); previsualizar().then(()=> inputCantidad.focus()); }
@@ -533,7 +598,7 @@
   };
   let nextFocus = null;
 
-  // ========= BUSCADOR (lee de B41) =========
+  /* ========== Buscador (LECTURA en B41) ========== */
   function abrirModal(){
     nextFocus = 'codigo';
     inputBuscador.value = "";
@@ -563,41 +628,69 @@
   cerrarModalBtn.addEventListener("click", cerrarModal);
   modal.addEventListener("click", (e)=>{ if(e.target===modal) cerrarModal(); });
   let resultados=[], pagina=0; const porPagina=20; let debounceTimer;
-  inputBuscador.addEventListener("input", ()=>{ clearTimeout(debounceTimer); const t=inputBuscador.value.trim(); if(!t){ resultadosDiv.innerHTML=""; contador.textContent=""; return; } debounceTimer=setTimeout(()=>buscarProductos(t),600); });
+  inputBuscador.addEventListener("input", ()=>{
+    clearTimeout(debounceTimer);
+    const t=inputBuscador.value.trim();
+    if(!t){ resultadosDiv.innerHTML=""; contador.textContent=""; return; }
+    debounceTimer=setTimeout(()=>buscarProductos(t),600);
+  });
   btnPrev.addEventListener("click", ()=>mostrarPagina(pagina-1));
   btnNext.addEventListener("click", ()=>mostrarPagina(pagina+1));
 
   async function buscarProductos(termino){
     resultados=[]; resultadosDiv.innerHTML="⏳ Buscando..."; barraProgreso.value=10; estado.textContent="";
-    if(/^\d+$/.test(termino)){
-      // por código exacto
-      let s1=await getDocs(query(collection(dbRead,"productos"), where("codigoBarra","==",termino), limit(1)));
-      let encontradoEn="codigoBarra";
-      if(s1.empty){
-        const s2=await getDocs(query(collection(dbRead,"productos"), where("codigosEquivalentes","array-contains",termino), limit(1)));
-        if(!s2.empty){ s1=s2; encontradoEn="equivalente"; }
+    const limpio = termino.trim();
+
+    // Numérico: codigoBarra -> equivalencias -> id
+    if(/^\d+$/.test(limpio)){
+      // codigoBarra exacto
+      let snap=await getDocs(query(
+        collection(dbRead,"productos"),
+        where("codigoBarra","==",limpio),
+        limit(1)
+      ));
+      if(!snap.empty){
+        resultados=snap.docs.map(d=>({id:d.id, ...d.data(), coincidencia:"codigoBarra", codigoBuscado:limpio}));
+        barraProgreso.value=100; mostrarPagina(0); return;
       }
-      if(!s1.empty){
-        resultados=s1.docs.map(d=>({id:d.id, ...d.data(), coincidencia:encontradoEn, codigoBuscado:termino}));
-      }else{
-        resultadosDiv.innerHTML="❌ No se encontró este código"; contador.textContent=""; barraProgreso.value=100; return;
+
+      // equivalencias flexibles
+      const eq = await buscarEquivalenteFlexible(limpio);
+      if (eq && eq.principal){
+        resultados=[{ id:eq.principal, ...eq.data, coincidencia:eq.matchedIn || "equivalente", codigoBuscado:limpio }];
+        barraProgreso.value=100; mostrarPagina(0); return;
       }
-      barraProgreso.value=100; mostrarPagina(0); return;
+
+      // por id exacto
+      const byId = await getProductoPorId(limpio);
+      if (byId){
+        resultados=[{ id:byId.id, ...byId, coincidencia:"id (documento)", codigoBuscado:limpio }];
+        barraProgreso.value=100; mostrarPagina(0); return;
+      }
+
+      resultadosDiv.innerHTML="❌ No se encontró este código"; contador.textContent=""; barraProgreso.value=100; return;
     }
-    // por nombre: (trae y filtra local; si la colección es enorme, conviene index/consulta por prefijo)
+
+    // Texto: trae y filtra local (si la colección es grande, considerar índices por prefijo)
     barraProgreso.value=25; estado.textContent="Cargando productos…";
     const snap=await getDocs(collection(dbRead,"productos"));
-    const palabras=termino.toLowerCase().split(/\s+/).filter(Boolean);
-    resultados=[]; snap.forEach(docu=>{ const p={id:docu.id, ...docu.data()}; if(p.concepto && palabras.every(w=>String(p.concepto).toLowerCase().includes(w))) resultados.push(p); });
+    const palabras=limpio.toLowerCase().split(/\s+/).filter(Boolean);
+    resultados=[];
+    snap.forEach(docu=>{
+      const p={id:docu.id, ...docu.data()};
+      if(p.concepto && palabras.every(w=>String(p.concepto).toLowerCase().includes(w))) resultados.push(p);
+    });
     barraProgreso.value=100; estado.textContent="";
     if(!resultados.length){ resultadosDiv.innerHTML="❌ Sin resultados"; contador.textContent=""; } else mostrarPagina(0);
   }
+
   function mostrarPagina(n){
     pagina=n; resultadosDiv.innerHTML="";
     const inicio=pagina*porPagina, fin=inicio+porPagina, lista=resultados.slice(inicio,fin);
     lista.forEach(p=>{
       const div=document.createElement("div"); div.className="producto-card";
-      const badge = p.coincidencia==="equivalente" ? `<div style="color:#b00; font-size:12px">🔗 Coincidencia en equivalente (${p.codigoBuscado})</div>` : "";
+      const badgeTxt = p.coincidencia ? `Coincidencia en ${p.coincidencia}` : "";
+      const badge = badgeTxt ? `<div style="color:#b00; font-size:12px">🔗 ${badgeTxt}${p.codigoBuscado ? ` (${p.codigoBuscado})` : ""}</div>` : "";
       div.innerHTML=`
         <b>${p.concepto || "SIN CONCEPTO"}</b><br>
         Código: ${p.codigoBarra || p.id}
@@ -621,7 +714,7 @@
     btnPrev.disabled=pagina===0; btnNext.disabled=fin>=resultados.length;
   }
 
-  // ========= ESCÁNER, CARRITO (escritura en inventariopv) =========
+  /* ========== Escáner (LECTURA) y Carrito (ESCRITURA) ========== */
   async function startStopCam(){
     if(lector){ try{ await lector.stop(); }catch{} lector=null; divLector.style.display="none"; return; }
     divLector.style.display="block"; lector=new Html5Qrcode("lector");
@@ -693,13 +786,13 @@
     await modificarCantidad(id, delta);
   });
 
-  // ========= Toolbar =========
+  /* ========== Toolbar ========== */
   tbAdd.addEventListener("click", agregarYGuardar);
   tbBuscar.addEventListener("click", ()=> abrirModal());
   tbScan.addEventListener("click", startStopCam);
   tbCart.addEventListener("click", abrirCarrito);
 
-  // Inicia
+  /* ========== Inicia ========== */
   setView("setup");
 </script>
 </body>
